@@ -1,0 +1,29 @@
+sudo apt update
+sudo apt install -y python3.12-venv python3-pip
+export AIRFLOW_HOME=~/airflow
+pip install "apache-airflow
+airflow standalone
+mkdir -p ~/airflow/dags
+nano ~/airflow/dags/wednesday_datetime.py
+      from datetime import datetime
+      import pendulum
+      from airflow import DAG
+      from airflow.operators.bash import BashOperator
+      
+      with DAG(
+          dag_id="wednesday_datetime",
+          start_date=pendulum.datetime(2026, 1, 1, tz="Asia/Kolkata"),
+          schedule="30 9 * * 3",   # 9:30 AM every Wednesday
+          catchup=False,
+          tags=["demo"],
+      ) as dag:
+      
+          show_datetime = BashOperator(
+              task_id="show_date_time",
+              bash_command="date '+%A, %d %B %Y - %I:%M:%S %p'",
+          )
+
+
+airflow dags list | grep wednesday_datetime
+airflow dags unpause wednesday_datetime
+airflow tasks test wednesday_datetime show_date_time 2026-10-28
