@@ -1,0 +1,40 @@
+lamda function
+import boto3
+import uuid
+from datetime import datetime
+
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('DateTimeTable')
+
+def lambda_handler(event, context):
+
+    current_date = datetime.now().strftime('%Y-%m-%d')
+    current_time = datetime.now().strftime('%H:%M:%S')
+
+    item = {
+        'id': str(uuid.uuid4()),
+        'date': current_date,
+        'time': current_time
+    }
+
+    table.put_item(Item=item)
+
+    return {
+        'statusCode': 200,
+        'body': 'Date and time stored successfully!'
+    }
+
+permission json
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "dynamodb:PutItem",
+      "Resource": "arn:aws:dynamodb:ap-south-1:YOUR_ACCOUNT_ID:table/DateTimeTable"
+    }
+  ]
+}
+
+python -m http.server 8000
