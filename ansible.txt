@@ -1,0 +1,44 @@
+sudo apt update
+sudo apt -y install ansible
+ansible --version
+mkdir ~/ansible-demo
+cd ~/ansible-demo
+
+cat > inventory.ini <<'EOF'
+[local]
+localhost ansible_connection=local
+EOF
+
+cd ~/ansible-demo
+cat > playbook.yml <<'EOF'
+---
+- name: Provision and configure localhost
+  hosts: local
+  become: true
+  tasks:
+    - name: Install packages
+      apt:
+        name:
+          - git
+          - curl
+          - nginx
+        state: present
+        update_cache: yes
+
+    - name: Create a config file
+      copy:
+        dest: /etc/motd
+        content: "Managed by Ansible\n"
+        mode: '0644'
+
+    - name: Ensure nginx is running and enabled
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+EOF
+
+ansible-playbook -i inventory.ini playbook.yml --check
+ansible-playbook -i inventory.ini playbook.yml --ask-become-pass
+nginx -v
+ansible-playbook -i inventory.ini playbook.yml --ask-become-pass
