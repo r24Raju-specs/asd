@@ -1,0 +1,56 @@
+lamda fucntion code
+import json
+import boto3
+import uuid
+
+dynamodb = boto3.resource("dynamodb")
+table = dynamodb.Table("RegistrationTable")
+
+def lambda_handler(event, context):
+    try:
+        data = json.loads(event["body"])
+
+        item = {
+            "id": str(uuid.uuid4()),
+            "name": data["name"],
+            "email": data["email"],
+            "age": int(data["age"])
+        }
+
+        table.put_item(Item=item)
+
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json"
+            },
+            "body": json.dumps({
+                "message": "Registration successful!"
+            })
+        }
+
+    except Exception as e:
+        return {
+            "statusCode": 400,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json"
+            },
+            "body": json.dumps({
+                "message": "Registration failed",
+                "error": str(e)
+            })
+        }
+
+permsision json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "dynamodb:PutItem",
+      "Resource": "arn:aws:dynamodb:ap-south-1:YOUR_ACCOUNT_ID:table/RegistrationTable"
+    }
+  ]
+}
